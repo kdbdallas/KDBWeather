@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct KDBWeatherApp: App {
+    @State private var viewModel: WeatherViewModel = WeatherViewModel()
+    
     var body: some Scene {
         WindowGroup {
             MainView()
+                .environment(viewModel)
         }
     }
 }

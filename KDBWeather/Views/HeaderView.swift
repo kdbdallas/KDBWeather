@@ -8,11 +8,12 @@
 import SwiftUI
 
 struct HeaderView: View {
-    
+    @Environment(WeatherViewModel.self) private var viewModel: WeatherViewModel
+
     @State private var animate = true
     
     var body: some View {
-        Text("Peoria")
+        Text(viewModel.city)
             .font(.largeTitle)
             .padding(.top)
         
@@ -40,4 +41,5 @@ struct HeaderView: View {
 
 #Preview {
     HeaderView()
+        .environment(WeatherViewModel())
 }
