@@ -7,16 +7,24 @@
 
 struct WeatherRepository {
     
-    func getWeatherData(city: String) async throws -> WeatherData {
+    func getCurrentWeatherData(city: String) async throws -> CurrentWeatherData {
         do {
-            return try await WeatherNetworking().fetchWeatherData(city: city)
+            return try await WeatherNetworking().fetchCurrentWeatherData(city: city)
         } catch {
-            throw WeatherError.noData
+            throw WeatherNetworkError.noData
+        }
+    }
+    
+    func getCurrentWeatherDataMock(city: String) async throws -> CurrentWeatherData {
+        do {
+            return try await WeatherNetworking().fetchCurrentWeatherDataMock(city: city)
+        } catch {
+            throw WeatherNetworkError.noData
         }
     }
 }
 
-struct WeatherData: Codable {
+struct CurrentWeatherData: Codable {
     let request: WeatherDataRequest
     let location: WeatherDataLocation
     let current: WeatherDataCurrent

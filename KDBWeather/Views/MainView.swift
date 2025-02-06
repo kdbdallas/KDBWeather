@@ -10,8 +10,8 @@ import SwiftUI
 struct MainView: View {
     @Environment(WeatherViewModel.self) private var viewModel: WeatherViewModel
     
-    let gradientStartColor = Color(cgColor: UIColor(red: 0.08, green: 0.11, blue: 0.29, alpha: 1.0).cgColor)
-    let gradientEndColor = Color(cgColor: UIColor(red: 0.34, green: 0.24, blue: 0.46, alpha: 1.0).cgColor)
+    let gradientStartColor = Color(red: 0.08, green: 0.11, blue: 0.29)
+    let gradientEndColor = Color(red: 0.34, green: 0.24, blue: 0.46)
     
     var body: some View {
         @Bindable var viewModel = viewModel
@@ -19,7 +19,6 @@ struct MainView: View {
         ScrollView(.vertical) {
             VStack {
                 HeaderView()
-                    .environment(viewModel)
                 
                 Spacer()
                 
