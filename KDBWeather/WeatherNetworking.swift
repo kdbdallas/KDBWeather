@@ -39,6 +39,10 @@ struct WeatherNetworking {
                 throw WeatherError.badResponse
             }
             
+            guard !data.isEmpty else {
+                throw WeatherError.noData
+            }
+            
             switch httpResponse.statusCode {
             case 200..<300:
                 return try decodeResponseData(data: data)
