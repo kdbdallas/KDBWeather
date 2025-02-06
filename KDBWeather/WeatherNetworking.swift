@@ -33,15 +33,20 @@ struct WeatherNetworking {
         let request = URLRequest(url: url)
         
         do {
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
             
-            do {
-                return try decodeResponseData(data: data)
-            } catch let error {
-                throw error
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw WeatherError.badResponse
             }
-        } catch {
-            throw WeatherError.badResponse
+            
+            switch httpResponse.statusCode {
+            case 200..<300:
+                return try decodeResponseData(data: data)
+            default:
+                throw WeatherError.badResponse
+            }
+        } catch let error {
+            throw error
         }
     }
     
