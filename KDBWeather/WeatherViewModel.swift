@@ -11,25 +11,52 @@ import Observation
 @Observable class WeatherViewModel {
     var repository: WeatherRepository
     var currentWeather: CurrentWeatherData?
-    var city: String = "Peoria, Arizona"
-    var localTime: String = "N/A"
-    var showLoadingError: Bool = false
+    var forecastWeather: ForecastWeatherData?
+    var city = "Peoria, Arizona"
+    var localTime = "N/A"
+    var showLoadingError = false
+    let useMock = true
     
     init(repository: WeatherRepository = WeatherRepository()) {
         self.repository = repository
     }
     
-    func getCurrentWeather() async {
+    func getWeather() async {
+        await withTaskGroup(of: Void.self) { [weak self] group in
+            group.addTask {
+                await self?.getCurrentWeather()
+            }
+            
+            group.addTask {
+                await self?.getForecastWeather()
+            }
+        }
+    }
+    
+    private func getCurrentWeather() async {
         do {
-            currentWeather = try await repository.getCurrentWeatherDataMock(city: city)
+            if useMock {
+                currentWeather = try await repository.getCurrentWeatherDataMock(city: city)
+            } else {
+                currentWeather = try await repository.getCurrentWeatherData(city: city)
+            }
 
             updateLocalTime()
         } catch let error {
             showLoadingError = true
-            print("loading error \(error.localizedDescription)")
+            print("current weather loading error \(error.localizedDescription)")
         }
     }
-    
+
+    private func getForecastWeather() async {
+        do {
+            forecastWeather = try await repository.getForecastWeatherDataMock(city: city)
+        } catch {
+            showLoadingError = true
+            print("forecast loading error \(error.localizedDescription)")
+        }
+    }
+
     private func updateLocalTime() {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
@@ -56,7 +83,7 @@ import Observation
             return "cloud"
         case 143:
             return "sun.dust"
-        case 176, 263, 266, 281, 284, 385:
+        case 176, 263, 266, 281, 284, 385, 386:
             return "cloud.drizzle"
         case 179, 323, 326, 329, 332, 335, 338, 368, 371, 392, 395:
             return "cloud.snow"
@@ -74,10 +101,37 @@ import Observation
             return "cloud.heavyrain"
         case 350, 374, 377:
             return "cloud.hail"
-        case 386:
-            return ""
         default:
             return ""
+        }
+    }
+    
+    func getDayOfWeek(date: String) -> String {
+        guard !date.isEmpty else { return "N/A" }
+        
+        let formatter  = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let formattedDate = formatter.date(from: date) else { return "N/A" }
+        let myCalendar = Calendar(identifier: .gregorian)
+        let weekDay = myCalendar.component(.weekday, from: formattedDate)
+        
+        switch weekDay {
+        case 1:
+            return "Sunday"
+        case 2:
+            return "Monday"
+        case 3:
+            return "Tuesday"
+        case 4:
+            return "Wednesday"
+        case 5:
+            return "Thursday"
+        case 6:
+            return "Friday"
+        case 7:
+            return "Saturday"
+        default:
+            return "N/A"
         }
     }
 }

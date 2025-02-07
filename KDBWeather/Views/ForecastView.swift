@@ -8,10 +8,14 @@
 import SwiftUI
 
 struct ForecastView: View {
+    @Environment(WeatherViewModel.self) private var viewModel: WeatherViewModel
     
     var body: some View {
+        let forecastWeather = viewModel.forecastWeather
+        let numDays = forecastWeather?.forecast.count ?? 0
+        
         VStack {
-            Text("5 Day Forecast")
+            Text("\(String(numDays)) Day Forecast")
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .foregroundStyle(.gray)
                 .fontWeight(.semibold)
@@ -20,49 +24,37 @@ struct ForecastView: View {
                 .overlay(.gray)
                 .padding(.trailing)
             
-            HStack() {
-                Text("Monday")
-                    .font(.headline)
+            ForEach(0..<numDays, id: \.self) { index in
+                let dayForecast = forecastWeather?.forecast[index]
+                let weatherCode = dayForecast?.weather_code ?? 113
+                let date = dayForecast?.date ?? ""
+                let dayOfWeek = viewModel.getDayOfWeek(date: date)
+                let icon = viewModel.iconForConditionCode(weatherCode)
+                let maxTemp = String(dayForecast?.maxtemp ?? 999)
+                let minTemp = String(dayForecast?.mintemp ?? 999)
                 
-                Spacer()
-                
-                Image(systemName: "cloud.drizzle")
-                    .font(.title2)
-                    .padding(.leading)
-                
-                Spacer()
-                
-                Text("74°")
-                    .font(.headline)
-                
-                Text("64°")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                    .padding(.trailing)
+                HStack() {
+                    Text(dayOfWeek)
+                        .font(.headline)
+                    
+                    Spacer()
+                    
+                    Image(systemName: icon)
+                        .font(.title2)
+                        .padding(.leading)
+                    
+                    Spacer()
+                    
+                    Text("\(maxTemp)°")
+                        .font(.headline)
+                    
+                    Text("\(minTemp)°")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                        .padding(.trailing)
+                }
+                .padding(.bottom)
             }
-            .padding(.bottom)
-            
-            HStack() {
-                Text("Tuesday")
-                    .font(.headline)
-                
-                Spacer()
-                
-                Image(systemName: "cloud")
-                    .font(.title2)
-                    .padding(.leading)
-                
-                Spacer()
-                
-                Text("73°")
-                    .font(.headline)
-                
-                Text("67°")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                    .padding(.trailing)
-            }
-            .padding(.bottom)
         }
         .padding(.leading)
     }
@@ -70,4 +62,5 @@ struct ForecastView: View {
 
 #Preview {
     ForecastView()
+        .environment(WeatherViewModel())
 }

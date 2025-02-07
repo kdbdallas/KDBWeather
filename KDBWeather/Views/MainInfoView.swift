@@ -8,11 +8,20 @@
 import SwiftUI
 
 struct MainInfoView: View {
+    @Environment(WeatherViewModel.self) private var viewModel: WeatherViewModel
     
     var body: some View {
         HStack(alignment: .center) {
             
-            Text("118°")
+            let currentWeather = viewModel.currentWeather?.current
+            
+            let temperature = String(currentWeather?.temperature ?? 999)
+            let feelsLike = String(currentWeather?.feelslike ?? 999)
+            let windSpeed = String(currentWeather?.wind_speed ?? 999)
+            let humidity = String(currentWeather?.humidity ?? 999)
+            let precipitation = String(currentWeather?.precip ?? 999)
+            
+            Text("\(temperature)°")
                 .font(.system(size: 105, weight: .thin))
                 .scaledToFit()
                 .minimumScaleFactor(0.5)
@@ -47,19 +56,19 @@ struct MainInfoView: View {
                 .frame(width: 80)
             
             VStack(alignment: .trailing) {
-                Text("81°")
+                Text("\(feelsLike)°")
                     .font(.footnote)
                     .frame(height: 15)
                 
-                Text("3 mph")
+                Text("\(windSpeed) mph")
                     .font(.footnote)
                     .frame(height: 15)
                 
-                Text("17%")
+                Text("\(humidity)%")
                     .font(.footnote)
                     .frame(height: 15)
                 
-                Text("0%")
+                Text("\(precipitation)%")
                     .font(.footnote)
                     .frame(height: 15)
             }
@@ -70,4 +79,5 @@ struct MainInfoView: View {
 
 #Preview {
     MainInfoView()
+        .environment(WeatherViewModel())
 }

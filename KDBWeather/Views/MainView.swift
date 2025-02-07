@@ -37,12 +37,12 @@ struct MainView: View {
             UIRefreshControl.appearance().tintColor = .white
             
             Task {
-                await viewModel.getCurrentWeather()
+                await viewModel.getWeather()
             }
         }
         .refreshable {
             Task {
-                await viewModel.getCurrentWeather()
+                await viewModel.getWeather()
             }
         }
         .alert("Error Refreshing Data", isPresented: $viewModel.showLoadingError) {

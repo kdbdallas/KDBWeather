@@ -15,11 +15,24 @@ enum WeatherNetworkError: Error {
 }
 
 struct WeatherNetworking {
-    
     // Get a free API key at: https://weatherstack.com or use the mock
-    private let apiKey = ""
+    // Forecasts are not available with free API so must use mock for forecasts
+    private let apiKey = "<SET ME>"
     private let APIURL = "https://api.weatherstack.com/current?access_key=APIKEY&query=CITY&units=f"
     
+    private func decodeResponseData<T: Decodable>(data: Data) throws -> T {
+        do {
+            let fetchedData = try JSONDecoder().decode(T.self, from: data)
+            
+            return fetchedData
+        } catch {
+            throw WeatherNetworkError.failedToDecode
+        }
+    }
+}
+
+// MARK: - Current Weather
+extension WeatherNetworking {
     func fetchCurrentWeatherDataMock(city: String) async throws -> CurrentWeatherData {
         guard let localURL = Bundle.main.url(forResource: "CurrentWeatherMock", withExtension: "json") else {
             throw WeatherNetworkError.badURL
@@ -66,14 +79,21 @@ struct WeatherNetworking {
             throw error
         }
     }
-    
-    private func decodeResponseData(data: Data) throws -> CurrentWeatherData {
+}
+
+// MARK: - Forecast Weather
+extension WeatherNetworking {
+    // Free API doesnt support forecasts so we are stuck mocking it
+    func fetchForecastWeatherDataMock(city: String) async throws -> ForecastWeatherData {
+        guard let localURL = Bundle.main.url(forResource: "ForecastWeatherMock", withExtension: "json") else {
+            throw WeatherNetworkError.badURL
+        }
+        
         do {
-            let fetchedData = try JSONDecoder().decode(CurrentWeatherData.self, from: data)
-            
-            return fetchedData
+            let data = try Data(contentsOf: localURL)
+            return try decodeResponseData(data: data)
         } catch {
-            throw WeatherNetworkError.failedToDecode
+            throw WeatherNetworkError.badURL
         }
     }
 }

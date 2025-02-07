@@ -9,8 +9,6 @@ import SwiftUI
 
 struct HeaderView: View {
     @Environment(WeatherViewModel.self) private var viewModel: WeatherViewModel
-
-    @State private var animate = true
     
     var body: some View {
         
@@ -27,10 +25,12 @@ struct HeaderView: View {
             .frame(height: 100)
         
         HStack {
-            Image(systemName: viewModel.iconForConditionCode(viewModel.currentWeather?.current.weather_code ?? 113))
+            let icon = viewModel.iconForConditionCode(viewModel.currentWeather?.current.weather_code ?? 113)
+            
+            Image(systemName: icon)
                 .font(.title)
                 .padding(.leading)
-                .symbolEffect(.pulse, options: .speed(0.5), isActive: true)
+                .symbolEffect(.pulse)
             
             Text(viewModel.currentWeather?.current.weather_descriptions.first ?? "N/A")
                 .font(.title)
