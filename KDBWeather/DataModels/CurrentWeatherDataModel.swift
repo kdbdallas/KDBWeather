@@ -7,9 +7,12 @@
 
 
 struct CurrentWeatherData: Codable {
-    let request: WeatherDataRequest
-    let location: WeatherDataLocation
-    let current: WeatherDataCurrent
+    let request: WeatherDataRequest?
+    let location: WeatherDataLocation?
+    let current: WeatherDataCurrent?
+    
+    let success: Bool?
+    let error: WeatherDataError?
     
     struct WeatherDataRequest: Codable {
         let type: String
@@ -46,5 +49,10 @@ struct CurrentWeatherData: Codable {
         let uv_index: Int
         let visibility: Int
         let is_day: String
+    }
+    
+    struct WeatherDataError: Codable {
+        let code: Int
+        let info: String
     }
 }

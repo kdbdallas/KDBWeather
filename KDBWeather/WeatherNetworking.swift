@@ -20,14 +20,10 @@ struct WeatherNetworking {
     private let apiKey = "<SET ME>"
     private let APIURL = "https://api.weatherstack.com/current?access_key=APIKEY&query=CITY&units=f"
     
-    private func decodeResponseData<T: Decodable>(data: Data) throws -> T {
-        do {
-            let fetchedData = try JSONDecoder().decode(T.self, from: data)
+    private func decodeResponseData<T: Decodable>(data: Data, type: T.Type) throws -> T {
+        let fetchedData = try JSONDecoder().decode(T.self, from: data)
             
-            return fetchedData
-        } catch {
-            throw WeatherNetworkError.failedToDecode
-        }
+        return fetchedData
     }
 }
 
@@ -37,13 +33,10 @@ extension WeatherNetworking {
         guard let localURL = Bundle.main.url(forResource: "CurrentWeatherMock", withExtension: "json") else {
             throw WeatherNetworkError.badURL
         }
-        
-        do {
-            let data = try Data(contentsOf: localURL)
-            return try decodeResponseData(data: data)
-        } catch {
-            throw WeatherNetworkError.badURL
-        }
+
+        let data = try Data(contentsOf: localURL)
+
+        return try decodeResponseData(data: data, type: CurrentWeatherData.self)
     }
     
     func fetchCurrentWeatherData(city: String) async throws -> CurrentWeatherData {
@@ -58,25 +51,21 @@ extension WeatherNetworking {
         
         let request = URLRequest(url: url)
         
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw WeatherNetworkError.badResponse
-            }
-            
-            guard !data.isEmpty else {
-                throw WeatherNetworkError.noData
-            }
-            
-            switch httpResponse.statusCode {
-            case 200..<300:
-                return try decodeResponseData(data: data)
-            default:
-                throw WeatherNetworkError.badResponse
-            }
-        } catch let error {
-            throw error
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WeatherNetworkError.badResponse
+        }
+        
+        guard !data.isEmpty else {
+            throw WeatherNetworkError.noData
+        }
+        
+        switch httpResponse.statusCode {
+        case 200..<300:
+            return try decodeResponseData(data: data, type: CurrentWeatherData.self)
+        default:
+            throw WeatherNetworkError.badResponse
         }
     }
 }
@@ -88,12 +77,9 @@ extension WeatherNetworking {
         guard let localURL = Bundle.main.url(forResource: "ForecastWeatherMock", withExtension: "json") else {
             throw WeatherNetworkError.badURL
         }
-        
-        do {
-            let data = try Data(contentsOf: localURL)
-            return try decodeResponseData(data: data)
-        } catch {
-            throw WeatherNetworkError.badURL
-        }
+
+        let data = try Data(contentsOf: localURL)
+
+        return try decodeResponseData(data: data, type: ForecastWeatherData.self)
     }
 }

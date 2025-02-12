@@ -12,7 +12,7 @@ struct HeaderView: View {
     
     var body: some View {
         
-        Text(viewModel.currentWeather?.location.name ?? "N/A")
+        Text(viewModel.currentWeather?.location?.name ?? "N/A")
             .font(.largeTitle)
             .padding(.top)
         
@@ -25,14 +25,14 @@ struct HeaderView: View {
             .frame(height: 100)
         
         HStack {
-            let icon = viewModel.iconForConditionCode(viewModel.currentWeather?.current.weather_code ?? 113)
+            let icon = viewModel.iconForConditionCode(viewModel.currentWeather?.current?.weather_code ?? 113)
             
             Image(systemName: icon)
                 .font(.title)
                 .padding(.leading)
                 .symbolEffect(.pulse)
             
-            Text(viewModel.currentWeather?.current.weather_descriptions.first ?? "N/A")
+            Text(viewModel.currentWeather?.current?.weather_descriptions.first ?? "N/A")
                 .font(.title)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .padding(.leading)
