@@ -9,27 +9,15 @@ struct WeatherRepository {
     
     // MARK: - Current Weather
     func getCurrentWeatherData(city: String) async throws -> CurrentWeatherData {
-        do {
-            return try await WeatherNetworking().fetchCurrentWeatherData(city: city)
-        } catch {
-            throw WeatherNetworkError.noData
-        }
+        return try await WeatherNetworking().fetchCurrentWeatherData(city: city)
     }
     
     func getCurrentWeatherDataMock(city: String) async throws -> CurrentWeatherData {
-        do {
-            return try await WeatherNetworking().fetchCurrentWeatherDataMock(city: city)
-        } catch {
-            throw WeatherNetworkError.noData
-        }
+        return try await WeatherNetworking().fetchCurrentWeatherDataMock(city: city)
     }
     
     // MARK: - Forecast Weather
     func getForecastWeatherDataMock(city: String) async throws -> ForecastWeatherData {
-        do {
-            return try await WeatherNetworking().fetchForecastWeatherDataMock(city: city)
-        } catch {
-            throw WeatherNetworkError.noData
-        }
+        return try await WeatherNetworking().fetchForecastWeatherDataMock(city: city)
     }
 }

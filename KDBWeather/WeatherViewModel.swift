@@ -41,10 +41,17 @@ import Observation
                 currentWeather = try await repository.getCurrentWeatherData(city: city)
             }
 
+            // Check if we got a valid response from the API or an Error
+            guard currentWeather?.error == nil && currentWeather?.current != nil else {
+                print("current weather loading error: \(String(describing: currentWeather?.error?.info))")
+                showLoadingError = true
+                return
+            }
+
             updateLocalTime()
         } catch let error {
+            print("current weather loading error \(error)")
             showLoadingError = true
-            print("current weather loading error \(error.localizedDescription)")
         }
     }
 
@@ -52,8 +59,9 @@ import Observation
         do {
             forecastWeather = try await repository.getForecastWeatherDataMock(city: city)
         } catch {
+            print("forecast loading error \(error)")
             showLoadingError = true
-            print("forecast loading error \(error.localizedDescription)")
+            
         }
     }
 
@@ -62,7 +70,7 @@ import Observation
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
         dateFormatter.locale = Locale(identifier: "en_US")
 
-        guard let time = currentWeather?.location.localtime, let date = dateFormatter.date(from: time) else {
+        guard let time = currentWeather?.location?.localtime, let date = dateFormatter.date(from: time) else {
             localTime = "N/A"
             return
         }
