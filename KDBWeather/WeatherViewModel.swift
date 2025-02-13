@@ -9,13 +9,14 @@ import Foundation
 import Observation
 
 @Observable class WeatherViewModel {
-    var repository: WeatherRepository
-    var currentWeather: CurrentWeatherData?
-    var forecastWeather: ForecastWeatherData?
-    var city = "Peoria, Arizona"
-    var localTime = "N/A"
-    var showLoadingError = false
-    let useMock = true
+    @ObservationIgnored var repository: WeatherRepository
+    @ObservationIgnored var city = "Peoria, Arizona"
+    @ObservationIgnored let useMock = true
+
+    @MainActor var currentWeather: CurrentWeatherData?
+    @MainActor var forecastWeather: ForecastWeatherData?
+    @MainActor var localTime = "N/A"
+    @MainActor var showLoadingError = false
     
     init(repository: WeatherRepository = WeatherRepository()) {
         self.repository = repository
@@ -34,37 +35,42 @@ import Observation
     }
     
     private func getCurrentWeather() async {
-        do {
-            if useMock {
-                currentWeather = try await repository.getCurrentWeatherDataMock(city: city)
-            } else {
-                currentWeather = try await repository.getCurrentWeatherData(city: city)
-            }
-
-            // Check if we got a valid response from the API or an Error
-            guard currentWeather?.error == nil && currentWeather?.current != nil else {
-                print("current weather loading error: \(String(describing: currentWeather?.error?.info))")
+        Task { @MainActor in
+            do {
+                if useMock {
+                    currentWeather = try await repository.getCurrentWeatherDataMock(city: city)
+                } else {
+                    currentWeather = try await repository.getCurrentWeatherData(city: city)
+                }
+                
+                // Check if we got a valid response from the API or an Error
+                guard currentWeather?.error == nil && currentWeather?.current != nil else {
+                    print("current weather loading error: \(String(describing: currentWeather?.error?.info))")
+                    showLoadingError = true
+                    return
+                }
+                
+                updateLocalTime()
+                
+            } catch {
+                print("current weather loading error \(error)")
                 showLoadingError = true
-                return
             }
-
-            updateLocalTime()
-        } catch let error {
-            print("current weather loading error \(error)")
-            showLoadingError = true
         }
     }
 
     private func getForecastWeather() async {
-        do {
-            forecastWeather = try await repository.getForecastWeatherDataMock(city: city)
-        } catch {
-            print("forecast loading error \(error)")
-            showLoadingError = true
-            
+        Task { @MainActor in
+            do {
+                forecastWeather = try await repository.getForecastWeatherDataMock(city: city)
+            } catch {
+                print("forecast loading error \(error)")
+                showLoadingError = true
+            }
         }
     }
 
+    @MainActor
     private func updateLocalTime() {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
@@ -117,29 +123,11 @@ import Observation
     func getDayOfWeek(date: String) -> String {
         guard !date.isEmpty else { return "N/A" }
         
-        let formatter  = DateFormatter()
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        guard let formattedDate = formatter.date(from: date) else { return "N/A" }
-        let myCalendar = Calendar(identifier: .gregorian)
-        let weekDay = myCalendar.component(.weekday, from: formattedDate)
         
-        switch weekDay {
-        case 1:
-            return "Sunday"
-        case 2:
-            return "Monday"
-        case 3:
-            return "Tuesday"
-        case 4:
-            return "Wednesday"
-        case 5:
-            return "Thursday"
-        case 6:
-            return "Friday"
-        case 7:
-            return "Saturday"
-        default:
-            return "N/A"
-        }
+        guard let formattedDate = formatter.date(from: date) else { return "N/A" }
+
+        return formatter.weekdaySymbols[Calendar.current.component(.weekday, from: formattedDate) - 1]
     }
 }
