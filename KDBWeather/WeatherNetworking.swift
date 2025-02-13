@@ -8,7 +8,6 @@
 import Foundation
 
 enum WeatherNetworkError: Error {
-    case failedToDecode
     case noData
     case badURL
     case badResponse
