@@ -16,28 +16,26 @@ struct MainView: View {
     var body: some View {
         @Bindable var viewModel = viewModel
         
-        ScrollView(.vertical) {
-            ScrollView(.horizontal) {
-                LazyHStack {
-                    ForEach(1...5, id: \.self) { _ in
-                        VStack {
-                            HeaderView()
-                            
-                            Spacer()
-                            
-                            MainInfoView()
-                            
-                            Spacer()
-                                .frame(height: 150)
-                            
-                            ForecastView()
-                        }
+        TabView {
+            ForEach(1...5, id: \.self) { _ in
+                ScrollView(.vertical) {
+                    VStack {
+                        HeaderView()
+                        
+                        Spacer()
+                        
+                        MainInfoView()
+                        
+                        Spacer()
+                            .frame(height: 150)
+                        
+                        ForecastView()
                     }
                 }
-                .scrollTargetLayout()
             }
-            .scrollTargetBehavior(.viewAligned)
         }
+        .tabViewStyle(.page)
+        .indexViewStyle(.page(backgroundDisplayMode: .automatic))
         .foregroundStyle(.white)
         .background(LinearGradient(colors: [gradientStartColor, gradientEndColor], startPoint: .top, endPoint: .bottom))
         .onAppear {
