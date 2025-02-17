@@ -22,20 +22,15 @@ import Observation
         self.repository = repository
     }
     
+    @MainActor
     func getWeather() async {
-        await withTaskGroup(of: Void.self) { [weak self] group in
-            group.addTask {
-                await self?.getCurrentWeather()
-            }
-            
-            group.addTask {
-                await self?.getForecastWeather()
-            }
-        }
+        await getCurrentWeather()
+        await getForecastWeather()
     }
     
+    @MainActor
     private func getCurrentWeather() async {
-        Task { @MainActor in
+        Task {
             do {
                 if useMock {
                     currentWeather = try await repository.getCurrentWeatherDataMock(city: city)
@@ -59,8 +54,9 @@ import Observation
         }
     }
 
+    @MainActor
     private func getForecastWeather() async {
-        Task { @MainActor in
+        Task {
             do {
                 forecastWeather = try await repository.getForecastWeatherDataMock(city: city)
             } catch {
